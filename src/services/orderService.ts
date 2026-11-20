@@ -5,7 +5,7 @@ import { getShippingOptions } from "@/services/shippingService";
 import type { CreateOrderInput } from "@/lib/validations/order";
 
 export class OrderError extends Error {
-  constructor(public code: "PRODUCT_UNAVAILABLE" | "SHIPPING_INVALID" | "ASSET_MISSING" | "DB_ERROR", message: string) {
+  constructor(public code: "PRODUCT_UNAVAILABLE" | "SHIPPING_INVALID" | "ASSET_MISSING" | "OUT_OF_STOCK" | "DB_ERROR", message: string) {
     super(message);
   }
 }
@@ -56,6 +56,9 @@ export async function createOrder(input: CreateOrderInput) {
     })),
   });
 
+  if (error?.message.includes("out_of_stock")) {
+    throw new OrderError("OUT_OF_STOCK", "Stok salah satu produk tidak mencukupi. Kurangi jumlah atau hapus item tersebut.");
+  }
   const row = data?.[0];
   if (error || !row) {
     console.error("create_order failed:", error);
@@ -71,7 +74,7 @@ export async function lookupOrder(orderCode: string, email: string) {
   const { data, error } = await admin
     .from("orders")
     .select(`order_code, status, payment_status, total, courier, tracking_number, created_at,
-      order_items ( id, product_name, quantity, unit_price ),
+      order_items ( id, product_name, quantity, unit_price, reviews ( id ) ),
       order_status_history ( status, note, created_at )`)
     .eq("order_code", orderCode)
     .eq("customer_email", email) // email disimpan lowercase (schema Zod)

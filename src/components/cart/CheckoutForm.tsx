@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDict } from "@/components/layout/LanguageProvider";
 import { useCartHydrated, useCartStore } from "@/hooks/useCart";
 import { useDebounce } from "@/hooks/useDebounce";
 import { computeTotals, type Tier } from "@/lib/pricing";
@@ -26,6 +27,8 @@ function FieldError({ msg }: { msg?: string }) {
 }
 
 export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
+  const t = useDict().checkout;
+  const tc = useDict().cart;
   const items = useCartStore((s) => s.items);
   const clear = useCartStore((s) => s.clear);
   const hydrated = useCartHydrated();
@@ -105,26 +108,26 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
   if (done) {
     return (
       <Card className="mx-auto max-w-lg">
-        <CardHeader><CardTitle>Pesanan dibuat</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t.doneTitle}</CardTitle></CardHeader>
         <CardContent className="space-y-4 text-sm">
-          <p>Kode pesanan Anda:</p>
+          <p>{t.yourCode}</p>
           <p className="rounded-md bg-muted p-3 text-center font-mono text-xl font-semibold">{done.orderCode}</p>
-          <p>Total pembayaran: <span className="font-semibold">{formatRupiah(done.total)}</span></p>
+          <p>{t.payTotal} <span className="font-semibold">{formatRupiah(done.total)}</span></p>
           <p className="text-muted-foreground">
-            Status saat ini: menunggu pembayaran. Simpan kode pesanan dan gunakan email yang Anda masukkan untuk melacaknya.
+            {t.pendingNote}
           </p>
-          <Button asChild className="w-full"><Link href="/orders">Lacak pesanan</Link></Button>
+          <Button asChild className="w-full"><Link href="/orders">{t.track}</Link></Button>
         </CardContent>
       </Card>
     );
   }
 
-  if (!hydrated) return <p className="text-sm text-muted-foreground">Memuat…</p>;
+  if (!hydrated) return <p className="text-sm text-muted-foreground">{t.loading}</p>;
   if (items.length === 0) {
     return (
       <div className="space-y-4 py-12 text-center">
-        <p className="text-muted-foreground">Keranjang masih kosong.</p>
-        <Button asChild><Link href="/product">Lihat produk</Link></Button>
+        <p className="text-muted-foreground">{tc.empty}</p>
+        <Button asChild><Link href="/product">{tc.browse}</Link></Button>
       </div>
     );
   }
@@ -134,40 +137,40 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <div className="space-y-6">
         <Card>
-          <CardHeader><CardTitle>Data pemesan</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t.orderer}</CardTitle></CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5"><Label htmlFor="name">Nama lengkap</Label>
+            <div className="space-y-1.5"><Label htmlFor="name">{t.fullName}</Label>
               <Input id="name" autoComplete="name" {...register("name")} /><FieldError msg={errors.name?.message} /></div>
-            <div className="space-y-1.5"><Label htmlFor="phone">No. HP / WhatsApp</Label>
+            <div className="space-y-1.5"><Label htmlFor="phone">{t.phone}</Label>
               <Input id="phone" type="tel" autoComplete="tel" placeholder="08xxxxxxxxxx" {...register("phone")} /><FieldError msg={errors.phone?.message} /></div>
-            <div className="space-y-1.5 sm:col-span-2"><Label htmlFor="email">Email</Label>
+            <div className="space-y-1.5 sm:col-span-2"><Label htmlFor="email">{t.email}</Label>
               <Input id="email" type="email" autoComplete="email" {...register("email")} /><FieldError msg={errors.email?.message} /></div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Alamat pengiriman</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t.addressTitle}</CardTitle></CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5 sm:col-span-2"><Label htmlFor="address">Alamat lengkap</Label>
+            <div className="space-y-1.5 sm:col-span-2"><Label htmlFor="address">{t.fullAddress}</Label>
               <textarea id="address" rows={3} autoComplete="street-address" {...register("address")}
                 className="flex w-full rounded-md border bg-background px-3 py-2 text-sm" /><FieldError msg={errors.address?.message} /></div>
-            <div className="space-y-1.5"><Label htmlFor="province">Provinsi</Label>
+            <div className="space-y-1.5"><Label htmlFor="province">{t.province}</Label>
               <select id="province" {...register("province")} className={input}>
-                <option value="">Pilih provinsi</option>
+                <option value="">{t.chooseProvince}</option>
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select><FieldError msg={errors.province?.message} /></div>
-            <div className="space-y-1.5"><Label htmlFor="city">Kota / Kabupaten</Label>
+            <div className="space-y-1.5"><Label htmlFor="city">{t.city}</Label>
               <Input id="city" autoComplete="address-level2" {...register("city")} /><FieldError msg={errors.city?.message} /></div>
-            <div className="space-y-1.5"><Label htmlFor="postalCode">Kode pos</Label>
+            <div className="space-y-1.5"><Label htmlFor="postalCode">{t.postal}</Label>
               <Input id="postalCode" inputMode="numeric" maxLength={5} autoComplete="postal-code" {...register("postalCode")} /><FieldError msg={errors.postalCode?.message} /></div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Pengiriman</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t.shipping}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {!province && <p className="text-sm text-muted-foreground">Pilih provinsi untuk melihat opsi pengiriman.</p>}
-            {loadingRates && <p className="text-sm text-muted-foreground">Menghitung ongkir…</p>}
+            {!province && <p className="text-sm text-muted-foreground">{t.pickProvince}</p>}
+            {loadingRates && <p className="text-sm text-muted-foreground">{t.calcShipping}</p>}
             {ratesError && <p role="alert" className="text-sm text-red-600">{ratesError}</p>}
             {options.map((o) => {
               const key = `${o.courier}:${o.service}`;
@@ -175,7 +178,7 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
                 <label key={key} className="flex cursor-pointer items-center justify-between rounded-md border p-3 text-sm has-[:checked]:border-primary">
                   <span className="flex items-center gap-3">
                     <input type="radio" value={key} {...register("shippingKey")} />
-                    <span>{o.label} <span className="text-muted-foreground">· estimasi {o.etaDays} hari</span></span>
+                    <span>{o.label} <span className="text-muted-foreground">· {t.eta(o.etaDays)}</span></span>
                   </span>
                   <span className="font-medium">{formatRupiah(o.cost)}</span>
                 </label>
@@ -187,7 +190,7 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
       </div>
 
       <Card className="h-fit lg:sticky lg:top-20">
-        <CardHeader><CardTitle>Ringkasan</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t.summary}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <ul className="space-y-2 text-sm">
             {items.map((i) => (
@@ -202,9 +205,9 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
             discountPercent={totals.discountPercent} shippingCost={selected?.cost ?? null} total={totals.total} />
           {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
           <Button type="submit" className="w-full" disabled={isPending || !selected}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Buat pesanan
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t.createOrder}
           </Button>
-          <p className="text-xs text-muted-foreground">Total final dihitung ulang oleh server dan dapat berbeda dari estimasi ini.</p>
+          <p className="text-xs text-muted-foreground">{t.finalNote}</p>
         </CardContent>
       </Card>
     </form>

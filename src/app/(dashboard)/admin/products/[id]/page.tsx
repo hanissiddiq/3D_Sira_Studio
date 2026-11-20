@@ -24,9 +24,9 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   if (!p) notFound();
 
   const defaults: ProductFormValues = {
-    slug: p.slug, category: p.category, name_id: p.name_id, name_en: p.name_en,
+    slug: p.slug, category: p.category, kind: p.kind === "ready" ? "ready" : "custom", name_id: p.name_id, name_en: p.name_en,
     description_id: p.description_id ?? "", description_en: p.description_en ?? "",
-    base_price: p.base_price, text_fee: p.text_fee, logo_fee: p.logo_fee, weight_grams: p.weight_grams,
+    base_price: p.base_price, text_fee: p.text_fee, logo_fee: p.logo_fee, weight_grams: p.weight_grams, stock: p.stock ?? null,
     is_active: p.is_active, model_url: p.model_url, images: p.images ?? [],
     customizer_config: parseCustomizerConfig(p.customizer_config),
   };

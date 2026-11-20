@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDict } from "@/components/layout/LanguageProvider";
 import { cn } from "@/lib/utils";
 import type { FontKey } from "./ThreeCanvas";
 
@@ -18,15 +19,16 @@ interface Props {
 }
 
 export function TextControls({ text, font, maxLength, onTextChange, onFontChange }: Props) {
+  const t = useDict().customizer;
   return (
     <div className="space-y-3">
       <div className="space-y-2">
-        <Label htmlFor="custom-text">Teks</Label>
+        <Label htmlFor="custom-text">{t.text}</Label>
         <Input id="custom-text" value={text} maxLength={maxLength}
-          onChange={(e) => onTextChange(e.target.value)} placeholder="Ketik teks…" />
+          onChange={(e) => onTextChange(e.target.value)} placeholder={t.textPlaceholder} />
         <p className="text-right text-xs text-muted-foreground">{text.length}/{maxLength}</p>
       </div>
-      <div role="radiogroup" aria-label="Font" className="flex flex-wrap gap-2">
+      <div role="radiogroup" aria-label={t.font} className="flex flex-wrap gap-2">
         {FONTS.map((f) => (
           <button key={f.key} type="button" role="radio" aria-checked={font === f.key}
             onClick={() => onFontChange(f.key)} style={{ fontFamily: f.css }}

@@ -5,6 +5,7 @@ import { Loader2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDict } from "@/components/layout/LanguageProvider";
 import { useCartStore } from "@/hooks/useCart";
 import { use3DSnapshot } from "@/hooks/use3DSnapshot";
 import { makeThumbnail } from "@/lib/image";
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export function ProductCustomizer({ productId, slug, name, modelUrl, config, basePrice, textFee, logoFee }: Props) {
+  const t = useDict().product;
   const [primary, setPrimary] = useState(config.primary.defaultColor);
   const [secondary, setSecondary] = useState(config.secondary.defaultColor);
   const [text, setText] = useState("");
@@ -77,7 +79,7 @@ export function ProductCustomizer({ productId, slug, name, modelUrl, config, bas
       openDrawer();
     } catch (e) {
       console.error("add to cart:", e);
-      setAddError(e instanceof Error ? e.message : "Gagal menambahkan ke keranjang.");
+      setAddError(e instanceof Error ? e.message : t.addFailed);
     } finally {
       setAdding(false);
     }
@@ -96,13 +98,13 @@ export function ProductCustomizer({ productId, slug, name, modelUrl, config, bas
             font, logoUrl,
           }}
         />
-        <p className="mt-2 text-center text-xs text-muted-foreground">Geser untuk memutar · cubit atau scroll untuk zoom</p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">{t.dragHint}</p>
       </div>
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold">Kustomisasi {name}</h2>
-          <p className="text-sm text-muted-foreground">Perubahan tampil langsung pada pratinjau 3D.</p>
+          <h2 className="text-lg font-semibold">{t.customize(name)}</h2>
+          <p className="text-sm text-muted-foreground">{t.liveHint}</p>
         </div>
 
         {config.primary.enabled && <ColorPicker label={config.primary.label} value={primary} onChange={setPrimary} />}
@@ -118,25 +120,25 @@ export function ProductCustomizer({ productId, slug, name, modelUrl, config, bas
 
         <div className="space-y-4 rounded-lg border p-4">
           <div>
-            <p className="text-sm text-muted-foreground">Estimasi harga satuan</p>
+            <p className="text-sm text-muted-foreground">{t.estimate}</p>
             <p className="text-2xl font-bold">{formatRupiah(estimate)}</p>
             {(hasText || hasLogo) && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Termasuk biaya {[hasText && `teks ${formatRupiah(textFee)}`, hasLogo && `logo ${formatRupiah(logoFee)}`].filter(Boolean).join(" + ")}.
+                {t.includes([hasText && t.feeText(formatRupiah(textFee)), hasLogo && t.feeLogo(formatRupiah(logoFee))].filter(Boolean).join(" + "))}
               </p>
             )}
-            <p className="mt-2 text-xs text-muted-foreground">Harga final dihitung ulang oleh server saat checkout.</p>
+            <p className="mt-2 text-xs text-muted-foreground">{t.serverNote}</p>
           </div>
 
           <div className="flex items-end gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="qty">Jumlah</Label>
+              <Label htmlFor="qty">{t.quantity}</Label>
               <Input id="qty" type="number" min={1} max={500} className="w-24" value={quantity}
                 onChange={(e) => setQuantity(Math.min(500, Math.max(1, Math.floor(Number(e.target.value)) || 1)))} />
             </div>
             <Button type="button" className="flex-1" onClick={handleAdd} disabled={adding}>
               {adding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShoppingBag className="mr-2 h-4 w-4" />}
-              {adding ? "Menyimpan desain…" : "Tambah ke keranjang"}
+              {adding ? t.saving : t.addToCart}
             </Button>
           </div>
           {addError && <p role="alert" className="text-sm text-red-600">{addError}</p>}

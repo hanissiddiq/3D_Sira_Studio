@@ -1,39 +1,61 @@
-import Link from "next/link";
-import { Box, Menu, PackageSearch, Search, Sparkles } from "lucide-react";
+import { Search, Zap } from "lucide-react";
+import { getBulkTiers, getFleetSummary } from "@/lib/data";
+import { getDict } from "@/lib/i18n/server";
+import { BrandMark } from "./BrandMark";
 import { CartButton } from "./CartButton";
+import { LanguageToggle } from "./LanguageToggle";
+import { NavLinks } from "./NavLinks";
+import { ThemeToggle } from "./ThemeToggle";
 
-export function Navbar() {
+export async function Navbar() {
+  const [d, tiers, fleet] = await Promise.all([getDict(), getBulkTiers(), getFleetSummary()]);
+  const t = d.nav;
+  const links = [
+    { href: "/", label: t.home }, { href: "/product", label: t.studio },
+    { href: "/shop", label: t.readyStock }, { href: "/gallery", label: t.realPrint },
+    { href: "/gifts", label: t.giftsBulk }, { href: "/orders", label: t.track },
+  ];
+  const promo = [...tiers].sort((a, b) => a.min_quantity - b.min_quantity)[0];
+
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
-        <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#5b78e6] text-white shadow-[0_4px_0_#1e315f] transition-transform group-hover:-translate-y-0.5">
-            <Box className="h-6 w-6" />
-          </span>
-          <span>
-            <span className="flex items-center gap-1 text-lg font-black leading-none tracking-tight text-slate-900">
-              SIRA <span className="text-[#5b78e6]">3D</span><Sparkles className="h-4 w-4 text-amber-400" />
-            </span>
-            <span className="mt-1 block text-[9px] font-black uppercase tracking-[0.18em] text-[#5b78e6]">Pastel Studio Fun</span>
-          </span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigasi utama">
-          <Link href="/" className="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white">Beranda</Link>
-          <Link href="/product" className="rounded-full px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Studio 3D</Link>
-          <Link href="/product" className="rounded-full px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950">Katalog</Link>
-          <Link href="/orders" className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-950"><PackageSearch className="h-4 w-4" />Lacak</Link>
-        </nav>
-
+    <header className="sticky top-0 z-30 border-b-2 border-ink bg-background/95 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+        <BrandMark />
+        <nav className="hidden items-center gap-1 xl:flex" aria-label={t.main}><NavLinks links={links} /></nav>
         <div className="flex items-center gap-2">
-          <label className="hidden xl:flex h-10 w-56 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 text-slate-400">
-            <Search className="h-4 w-4" />
-            <input className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400" placeholder="Cari produk custom" />
-          </label>
-          <CartButton />
-          <button className="grid h-10 w-10 place-items-center rounded-full border border-slate-200 text-slate-700 lg:hidden" aria-label="Buka menu" type="button"><Menu className="h-5 w-5" /></button>
+          <form action="/product" method="get" role="search" className="relative hidden lg:block">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input name="q" type="search" maxLength={50} placeholder={t.search} aria-label={t.search}
+              className="h-10 w-56 rounded-full border-2 bg-powder pl-9 pr-3 text-sm placeholder:text-muted-foreground" />
+          </form>
+          <span className="hidden items-center gap-1 rounded-full border-2 border-ink bg-mint px-3 py-1.5 font-label text-xs font-bold text-on-pastel shadow-cartoon md:inline-flex">
+            <Zap className="h-3.5 w-3.5" /> {t.fastPrint}
+          </span>
+          <LanguageToggle /><ThemeToggle /><CartButton />
         </div>
       </div>
+
+      <nav className="flex gap-1 overflow-x-auto border-t border-ink/20 px-4 py-2 xl:hidden" aria-label={t.main}>
+        <NavLinks links={links} />
+      </nav>
+
+      {(promo || fleet) && (
+        <div className="border-t border-ink/20 bg-powder/60">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 text-xs">
+            {promo && (
+              <>
+                <span className="rounded-full border-2 border-ink bg-peach px-2.5 py-0.5 font-label font-bold text-on-pastel">🍬 {d.landing.promoBadge}</span>
+                <span className="font-semibold">{d.landing.promoText(promo.percent, promo.min_quantity)}</span>
+              </>
+            )}
+            {fleet && (
+              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-ink bg-card px-2.5 py-0.5 font-label font-bold">
+                <span className="h-2 w-2 rounded-full bg-secondary" /> {d.landing.machines(fleet.online)}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

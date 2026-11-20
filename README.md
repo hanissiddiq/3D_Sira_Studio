@@ -1,72 +1,56 @@
-# Sira Studio Clone — Fondasi (Phase 1–3)
+# Sira 3D Studio — Platform Cetak 3D Custom & Ready Stock
 
-## Setup
+Next.js 16 (App Router) · React 19 · Tailwind CSS v4 · Supabase (Auth, Postgres + RLS, Storage) · three.js (react-three-fiber).
+Tampilan mengikuti rancangan **Pastel Workshop Studio** (pastel kartun: outline arang, bayangan offset keras, font Plus Jakarta Sans + Space Grotesk).
+
+## Menjalankan
 ```bash
-npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir
-npm i @supabase/supabase-js @supabase/ssr zod react-hook-form @hookform/resolvers server-only lucide-react
-npm i three @react-three/fiber @react-three/drei zustand
-npx shadcn@latest init
-cp .env.example .env.local   # isi kredensial Supabase
+npm install
+cp .env.example .env.local        # isi URL & key Supabase, QRIS_WEBHOOK_SECRET
+npm run dev                        # http://localhost:3000
+npm run build && npm start         # produksi
 ```
-Jalankan `supabase/migrations/0001_init.sql` (SQL Editor atau `supabase db push`), lalu buat user
-admin pertama di Auth → Users dan promosikan lewat SQL Editor:
+
+### Database (urut)
+Jalankan semua file di `supabase/migrations/` berurutan (SQL Editor atau `supabase db push`):
+`0001_init` → `0002_dashboard_stats` → `0003_checkout_payments` → `0004_order_status` → `0005_upload_hardening`
+→ `0006_product_kind` → `0007_workshop_schema` → `0008_workshop_functions`.
+Opsional: `supabase/seed.sql` (printer & material contoh).
+
+Admin pertama: buat user di Supabase Auth, lalu di SQL Editor:
 ```sql
 update public.profiles set role = 'admin' where id = '<UUID_USER>';
 ```
- jika gagal atau permission tidak izinkan ikuti panduan dibawah
- -- 1. Matikan semua trigger buatan user di tabel profiles
-ALTER TABLE public.profiles DISABLE TRIGGER USER;
+Operator: role `operator`. Akun lain (`customer`) tidak punya akses dashboard.
 
--- 2. Jalankan update role
-UPDATE public.profiles 
-SET role = 'admin' 
-WHERE id = 'adf6db3e-7b9a-41cd-b482-6795b90465f6';
+## Peta rancangan → aplikasi
+| Rancangan | Rute | Data |
+|---|---|---|
+| Storefront Landing Page | `/` | produk custom/ready, galeri, ulasan, tier diskon, armada (nyata dari database) |
+| 3D Customizer | `/product`, `/product/[slug]` | three.js: warna, teks, logo, snapshot |
+| Ready Stock | `/shop`, `/shop/[slug]` | stok dikurangi atomik saat checkout |
+| Papan Antrean Cetak | `/admin` | pesanan per tahap (Validasi → Cetak → QC → Packing) |
+| Farm Fleet Live | `/admin/fleet` | tabel `printers` |
+| Slicing & Validasi | `/admin/slicing` | checklist pra-cetak, parameter, pilih printer, mulai cetak |
+| Manajemen Material | `/admin/materials` | stok filamen berkurang otomatis |
+| Logistik & Kirim | `/admin/logistics` | resi termal (barcode CODE128, cetak), scanner, dispatch |
+| Pengaturan | `/admin/settings` | tier diskon grosir |
+| (tambahan) | `/admin/orders`, `/admin/products`, `/admin/gallery`, `/admin/reviews` | CRUD katalog, galeri, moderasi ulasan |
 
-Generate tipe: `npx supabase gen types typescript --project-id <id> > src/types/database.ts`
+Alur status pesanan: `pending_payment → paid (webhook QRIS) → in_production → qc_finishing → packing → shipped → completed`.
+Bahasa (ID/EN) & tema terang/gelap di navbar; teks storefront ada di `src/lib/i18n/dictionaries.ts`.
 
-## Phase 4 — Login & Dashboard
-```bash
-npx shadcn@latest add button input label card
-npm i clsx tailwind-merge   # jika belum terpasang oleh shadcn init
-```
-Jalankan juga `supabase/migrations/0002_dashboard_stats.sql`.
-Menu Pesanan/Produk/Galeri/Ulasan masih 404 sampai halamannya dibuat.
+## Bagian rancangan yang BELUM/TIDAK diimplementasikan
+Rancangan memuat fitur mesin/IoT yang butuh perangkat keras atau layanan pihak ketiga; ini tidak dibuat agar tidak menampilkan data palsu:
+- Telemetri mesin real-time (MQTT, suhu nozzle/bed, AI Lidar/first-layer, kamera CCTV) — progres cetak di aplikasi adalah **estimasi** dari durasi yang diinput.
+- Viewer G-code/toolpath 3D, slicer otomatis, auto-orientasi / repair mesh, upload file STL pelanggan, Multi-Plate Arranger.
+- WhatsApp webhook/notifikasi, Request Pickup API kurir, integrasi tarif/resi kurir (ongkir masih tarif placeholder di `src/services/shippingService.ts`).
+- **Pembayaran QRIS**: webhook sudah ada (`/api/webhooks/qris`, HMAC-SHA256), tetapi pembuatan kode QR di checkout menunggu penyedia QRIS yang dipilih.
+- Rate limit (checkout, lookup pesanan, upload), pembersihan file upload yatim, dan pembatalan otomatis pesanan kedaluwarsa.
 
-## Phase 5 — Checkout & webhook QRIS
-Jalankan `supabase/migrations/0003_checkout_payments.sql`. Tambahkan ke `.env.local`:
-`QRIS_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, opsional `SHIPPING_ORIGIN_PROVINCE`.
-- Webhook: `POST /api/webhooks/qris`, header `x-signature` = HMAC-SHA256 hex dari raw body.
-  Sesuaikan `signature.ts` dan `payloadSchema` dengan penyedia QRIS yang dipakai.
-- Tes lokal:
-```bash
-BODY='{"event_id":"evt-1","order_code":"SIRA-XXXXXXXX","status":"paid","amount":150000}'
-SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$QRIS_WEBHOOK_SECRET" -hex | sed 's/^.* //')
-curl -X POST localhost:3000/api/webhooks/qris -H "x-signature: $SIG" -d "$BODY"
-```
-
-## Phase 6 — Pesanan admin
-Jalankan `supabase/migrations/0004_order_status.sql`. Halaman: `/admin/orders` (filter, cari, paginasi)
-dan `/admin/orders/[id]` (detail, snapshot desain, riwayat, ubah status + resi).
-Alur status: pending_payment → paid (hanya via webhook) → in_production → shipped (wajib resi) → completed.
-Pembatalan pesanan yang sudah dibayar hanya admin dan refund dilakukan manual di luar sistem.
-
-## Phase 7 — CRUD produk, upload model, customizer 3D
-```bash
-npm i three @react-three/fiber @react-three/drei && npm i -D @types/three
-```
-Tidak ada migrasi baru (memakai bucket `product-assets` dan policy staff dari 0001).
-- Admin: `/admin/products` (daftar), `/new`, `/[id]` (edit + hapus untuk admin). Upload `.glb` & foto langsung
-  ke Storage dari browser memakai session staff; server hanya menerima URL dari bucket proyek ini.
-- Storefront: `/product` dan `/product/[slug]` (customizer 3D dengan warna, teks, logo).
-- Konfigurasi dekal (mesh, posisi, rotasi, skala) disetel lewat pratinjau langsung di form admin.
-
-## Phase 8 — Keranjang, upload desain, checkout, lacak pesanan
-```bash
-npm i zustand
-```
-Jalankan `supabase/migrations/0005_upload_hardening.sql`. Hapus `src/app/page.tsx` bawaan create-next-app
-(beranda sekarang di `src/app/(storefront)/page.tsx`).
-- Keranjang disimpan di localStorage (`sira-cart-v1`); harga di keranjang hanya estimasi, server menghitung ulang.
-- Upload logo & snapshot desain: server membuat path acak + token upload sekali pakai (bucket privat),
-  server memverifikasi file ada sebelum membuat pesanan.
-- Setelah pesanan dibuat, instruksi/QR pembayaran QRIS BELUM ditampilkan (menunggu penyedia QRIS dipilih).
+## Catatan teknis
+- Harga, ongkir, diskon, dan stok **selalu dihitung ulang di server** (`pricingService`, RPC `create_order`); data keranjang di browser hanya estimasi.
+- RLS aktif di semua tabel; pembeli tamu tidak punya akses langsung ke `orders`. Operasi tamu lewat server (service role) dan RPC `security definer` yang hanya bisa dipanggil `service_role`.
+- Upload logo/snapshot pelanggan memakai signed upload URL (bucket privat); staf melihatnya lewat signed URL 5 menit.
+- Opsional env: `NEXT_PUBLIC_WHATSAPP_NUMBER` (tombol konsultasi grosir), `NEXT_PUBLIC_STUDIO_ADDRESS` (alamat pengirim di label resi), `SHIPPING_ORIGIN_PROVINCE`.
+- Tipe database: `npx supabase gen types typescript --project-id <id> > src/types/database.ts` lalu pasang ke klien Supabase untuk pengecekan tipe yang lebih ketat.

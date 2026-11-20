@@ -1,8 +1,7 @@
 // Next.js 16+: proxy.ts. Untuk Next.js 15 ganti nama file jadi middleware.ts
 // dan nama fungsi jadi `middleware`.
 import type { NextRequest } from "next/server";
-// import { updateSession } from "@/lib/supabase/proxy";
-import { updateSession } from "./lib/supabase/proxy";
+import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
   return updateSession(request);

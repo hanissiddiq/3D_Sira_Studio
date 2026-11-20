@@ -15,7 +15,8 @@ export interface CartItem {
   textFee: number;
   logoFee: number;
   quantity: number;
-  thumbnail?: string;  // JPEG kecil (data URL) untuk tampilan keranjang
+  thumbnail?: string;  // data URL kecil (custom) atau URL foto produk (siap beli)
+  ready?: boolean;     // produk siap beli: item identik digabung
   customization: {
     primaryColor: string;
     secondaryColor?: string;
@@ -51,9 +52,15 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       items: [],
       drawerOpen: false,
-      addItem: (item) => set((s) => ({
-        items: [...s.items, { ...item, id: crypto.randomUUID(), quantity: clampQty(item.quantity) }],
-      })),
+      addItem: (item) => set((s) => {
+        if (item.ready) {
+          const existing = s.items.find((i) => i.ready && i.productId === item.productId);
+          if (existing) {
+            return { items: s.items.map((i) => (i.id === existing.id ? { ...i, quantity: clampQty(i.quantity + item.quantity) } : i)) };
+          }
+        }
+        return { items: [...s.items, { ...item, id: crypto.randomUUID(), quantity: clampQty(item.quantity) }] };
+      }),
       updateQuantity: (id, quantity) => set((s) => ({
         items: s.items.map((i) => (i.id === id ? { ...i, quantity: clampQty(quantity) } : i)),
       })),

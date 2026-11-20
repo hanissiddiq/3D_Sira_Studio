@@ -52,6 +52,7 @@ export const productFormSchema = z.object({
   slug: z.string().trim().toLowerCase().min(2, "Minimal 2 karakter").max(80)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Hanya huruf kecil, angka, dan tanda hubung"),
   category: z.string().trim().min(2, "Kategori wajib diisi").max(50),
+  kind: z.enum(["custom", "ready"]),
   name_id: z.string().trim().min(2, "Nama wajib diisi").max(120),
   name_en: z.string().trim().min(2, "Name is required").max(120),
   description_id: optionalText,
@@ -60,6 +61,7 @@ export const productFormSchema = z.object({
   text_fee: z.number("Wajib diisi").int().min(0).max(10_000_000),
   logo_fee: z.number("Wajib diisi").int().min(0).max(10_000_000),
   weight_grams: z.number("Wajib diisi").int().min(1).max(100_000),
+  stock: z.number().int().min(0).max(1_000_000).nullable(),
   is_active: z.boolean(),
   model_url: z.string().url().nullable(),
   images: z.array(z.string().url()).max(8),
@@ -68,9 +70,9 @@ export const productFormSchema = z.object({
 export type ProductFormValues = z.infer<typeof productFormSchema>;
 
 export const EMPTY_PRODUCT: ProductFormValues = {
-  slug: "", category: "general", name_id: "", name_en: "",
+  slug: "", category: "general", kind: "custom", name_id: "", name_en: "",
   description_id: "", description_en: "",
-  base_price: 0, text_fee: 0, logo_fee: 0, weight_grams: 200,
+  base_price: 0, text_fee: 0, logo_fee: 0, weight_grams: 200, stock: null,
   is_active: true, model_url: null, images: [],
   customizer_config: DEFAULT_CUSTOMIZER_CONFIG,
 };

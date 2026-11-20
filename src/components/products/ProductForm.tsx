@@ -77,6 +77,7 @@ export function ProductForm({ mode, productId, defaultValues, canDelete }: Props
   const modelUrl = watch("model_url");
   const images = watch("images");
   const config = watch("customizer_config");
+  const kind = watch("kind");
 
   // Pratinjau memakai konfigurasi valid terakhir agar tidak berkedip saat input sedang diketik
   const configKey = JSON.stringify(config);
@@ -136,7 +137,15 @@ export function ProductForm({ mode, productId, defaultValues, canDelete }: Props
               })} />
             </Field>
             <Field label="Slug (URL)" error={errors.slug?.message}><Input {...register("slug")} /></Field>
-            <Field label="Kategori" error={errors.category?.message}><Input {...register("category")} /></Field>
+            <Field label="Kategori" error={errors.category?.message} hint="Kategori “gift” tampil di halaman Hadiah.">
+              <Input {...register("category")} />
+            </Field>
+            <Field label="Jenis produk" hint="Rancang sendiri → /product (customizer 3D). Siap beli → /shop.">
+              <select {...register("kind")} className={selectCls}>
+                <option value="custom">Rancang sendiri (customizer 3D)</option>
+                <option value="ready">Siap beli (toko)</option>
+              </select>
+            </Field>
             <div className="sm:col-span-2">
               <Field label="Deskripsi (Indonesia)" error={errors.description_id?.message}>
                 <textarea rows={3} {...register("description_id")} className="flex w-full rounded-md border bg-background px-3 py-2 text-sm" />
@@ -162,6 +171,12 @@ export function ProductForm({ mode, productId, defaultValues, canDelete }: Props
             <Field label="Berat per unit (gram)" error={errors.weight_grams?.message}>
               <Input type="number" min={1} {...register("weight_grams", { valueAsNumber: true })} />
             </Field>
+            {kind === "ready" && (
+              <Field label="Stok (pcs)" error={errors.stock?.message} hint="Kosongkan = tanpa batas / dibuat saat dipesan.">
+                <Input type="number" min={0}
+                  {...register("stock", { setValueAs: (v) => (v === "" || v == null || Number.isNaN(Number(v)) ? null : Number(v)) })} />
+              </Field>
+            )}
             <Field label="Biaya tambahan teks (Rp)" error={errors.text_fee?.message}>
               <Input type="number" min={0} {...register("text_fee", { valueAsNumber: true })} />
             </Field>
@@ -220,6 +235,7 @@ export function ProductForm({ mode, productId, defaultValues, canDelete }: Props
           </CardContent>
         </Card>
 
+        {kind === "custom" && (
         <Card>
           <CardHeader><CardTitle>Konfigurasi customizer</CardTitle></CardHeader>
           <CardContent className="space-y-6">
@@ -290,6 +306,8 @@ export function ProductForm({ mode, productId, defaultValues, canDelete }: Props
             </div>
           </CardContent>
         </Card>
+
+        )}
 
         {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
         <div className="flex flex-wrap items-center gap-3">

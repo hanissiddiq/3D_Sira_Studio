@@ -14,7 +14,7 @@ export default async function AdminProductsPage() {
   const supabase = await createClient();
   const { data: products, error } = await supabase
     .from("products")
-    .select("id, slug, name_id, category, base_price, is_active, images, model_url")
+    .select("id, slug, name_id, category, kind, base_price, is_active, images, model_url")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -39,6 +39,7 @@ export default async function AdminProductsPage() {
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="py-2 pr-4 font-medium">Produk</th>
                     <th className="py-2 pr-4 font-medium">Kategori</th>
+                    <th className="py-2 pr-4 font-medium">Jenis</th>
                     <th className="py-2 pr-4 font-medium">Harga</th>
                     <th className="py-2 pr-4 font-medium">Model 3D</th>
                     <th className="py-2 font-medium">Status</th>
@@ -57,6 +58,7 @@ export default async function AdminProductsPage() {
                         </Link>
                       </td>
                       <td className="py-2 pr-4">{p.category}</td>
+                      <td className="py-2 pr-4">{p.kind === "ready" ? "Siap beli" : "Rancang"}</td>
                       <td className="py-2 pr-4">{formatRupiah(p.base_price)}</td>
                       <td className="py-2 pr-4">{p.model_url ? "Ada" : "—"}</td>
                       <td className="py-2">

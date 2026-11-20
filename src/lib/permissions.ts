@@ -10,8 +10,10 @@ const PERMISSIONS = {
   "products:delete": ["admin"],
   "gallery:write": ["admin", "operator"],
   "reviews:moderate": ["admin", "operator"],
+  "reviews:delete": ["admin"],
   "discounts:manage": ["admin"],
   "users:manage": ["admin"],
+  "workshop:manage": ["admin", "operator"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

@@ -2,7 +2,7 @@
 
 import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Canvas, createPortal, useThree } from "@react-three/fiber";
-import { Bounds, Decal, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
+import { Bounds, Decal, OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { CustomizerConfig } from "@/lib/validations/product";
 import type { CaptureRef } from "@/hooks/use3DSnapshot";
@@ -213,11 +213,6 @@ function SnapshotBridge({ captureRef }: { captureRef?: CaptureRef }) {
   return null;
 }
 
-function Loader() {
-  const { progress } = useProgress();
-  return <Html center><span className="whitespace-nowrap text-sm text-muted-foreground">Memuat model {Math.round(progress)}%</span></Html>;
-}
-
 class ModelErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -239,7 +234,7 @@ export default function ThreeCanvas({ modelUrl, config, state, onInspect, captur
           <hemisphereLight args={["#ffffff", "#888888", 1.1]} />
           <directionalLight position={[3, 5, 4]} intensity={1.6} />
           <directionalLight position={[-4, 2, -3]} intensity={0.6} />
-          <Suspense fallback={<Loader />}>
+          <Suspense fallback={null}>
             <Bounds fit clip observe margin={1.3}>
               {modelUrl
                 ? <GltfModel url={modelUrl} config={config} state={state} onInspect={onInspect} />

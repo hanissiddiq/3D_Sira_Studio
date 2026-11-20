@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useDict } from "@/components/layout/LanguageProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCartHydrated, useCartStore } from "@/hooks/useCart";
 import { computeTotals, type Tier } from "@/lib/pricing";
@@ -14,14 +15,15 @@ export function CartView({ tiers }: { tiers: Tier[] }) {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const hydrated = useCartHydrated();
+  const t = useDict().cart;
   const totals = computeTotals(items, tiers);
 
-  if (!hydrated) return <p className="text-sm text-muted-foreground">Memuat keranjang…</p>;
+  if (!hydrated) return <p className="text-sm text-muted-foreground">{t.loading}</p>;
   if (items.length === 0) {
     return (
       <div className="space-y-4 py-12 text-center">
-        <p className="text-muted-foreground">Keranjang masih kosong.</p>
-        <Button asChild><Link href="/product">Lihat produk</Link></Button>
+        <p className="text-muted-foreground">{t.empty}</p>
+        <Button asChild><Link href="/product">{t.browse}</Link></Button>
       </div>
     );
   }
@@ -40,8 +42,8 @@ export function CartView({ tiers }: { tiers: Tier[] }) {
             discountPercent={totals.discountPercent} nextTier={totals.nextTier} />
           <CartSummary subtotal={totals.subtotal} discount={totals.discount}
             discountPercent={totals.discountPercent} total={totals.total} />
-          <p className="text-xs text-muted-foreground">Ongkir dihitung di langkah checkout. Harga final dihitung ulang oleh server.</p>
-          <Button asChild className="w-full"><Link href="/checkout">Lanjut ke checkout</Link></Button>
+          <p className="text-xs text-muted-foreground">{t.shippingNote}</p>
+          <Button asChild className="w-full"><Link href="/checkout">{t.toCheckout}</Link></Button>
         </CardContent>
       </Card>
     </div>

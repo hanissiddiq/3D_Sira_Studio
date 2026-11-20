@@ -1,44 +1,23 @@
-import type { Metadata, Viewport } from "next";
+// MENGGANTIKAN layout.tsx bawaan create-next-app (tema + bahasa dipasang di root agar berlaku di admin juga).
+import type { Metadata } from "next";
 import "./globals.css";
-import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
+import { LanguageProvider } from "@/components/layout/LanguageProvider";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { getLang } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Sira Studio",
-    template: "%s | Sira Studio",
-  },
-  description: "Rancang dan pesan custom merchandise pilihan Anda di Sira Studio.",
+  title: { default: "Sira Studio", template: "%s · Sira Studio" },
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  themeColor: "#fdfbf7",
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html
-      lang="id"
-      className={`${plusJakarta.variable} ${spaceGrotesk.variable}`}
-    >
-      <body>{children}</body>
+    <html lang={lang} suppressHydrationWarning>
+      <body className="min-h-svh bg-background text-foreground antialiased">
+        <ThemeProvider>
+          <LanguageProvider lang={lang}>{children}</LanguageProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

@@ -1,113 +1,146 @@
 @import "tailwindcss";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/space-grotesk";
 
+@custom-variant dark (&:is(.dark *));
+
+/* ============ Pastel Workshop Studio — design tokens ============ */
 :root {
-  --background: 42 33% 98%;
-  --foreground: 225 30% 12%;
-  --card: 0 0% 100%;
-  --card-foreground: 225 30% 12%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 225 30% 12%;
-  --primary: 222 47% 32%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 37 36% 92%;
-  --secondary-foreground: 225 30% 18%;
-  --muted: 220 18% 96%;
-  --muted-foreground: 220 10% 44%;
-  --accent: 38 87% 67%;
-  --accent-foreground: 225 30% 12%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 220 16% 88%;
-  --input: 220 16% 88%;
-  --ring: 222 47% 32%;
-  --radius: 0.875rem;
+  --background: #fdfbfa;           /* marshmallow canvas */
+  --foreground: #2f3846;           /* soft charcoal */
+  --card: #ffffff;
+  --card-foreground: #2f3846;
+  --muted: #f7f4f0;                /* inset recess */
+  --muted-foreground: #737f94;
+  --primary: #6c93f5;              /* powder sky */
+  --primary-foreground: #ffffff;
+  --secondary: #65d4b0;            /* minty cyan */
+  --secondary-foreground: #2f3846;
+  --accent: #ffae85;               /* warm peach */
+  --accent-foreground: #2f3846;
+  --border: #2f3846;
+  --input: #2f3846;
+  --ring: #6c93f5;
+  --ink: #2f3846;                  /* outline strokes */
+  --ink-shadow: #2f3846;
+  --on-pastel: #2f3846;
+  --powder: #d9e4ff;
+  --mint-soft: #d5f7ec;
+  --peach-soft: #ffe7dc;
+  --lilac: #cbb5ff;
+  --lilac-soft: #f0eaff;
+  --butter: #fde38c;
+  --butter-soft: #fff8df;
+  --blush: #ffb7d5;
+  --blush-soft: #ffe6f0;
+  --dot: rgba(47, 56, 70, 0.1);
+}
+
+.dark {
+  --background: #151a24;
+  --foreground: #e8ecf5;
+  --card: #1f2633;
+  --card-foreground: #e8ecf5;
+  --muted: #1a202c;
+  --muted-foreground: #98a3b8;
+  --primary: #6c93f5;
+  --primary-foreground: #ffffff;
+  --secondary: #65d4b0;
+  --secondary-foreground: #2f3846;
+  --accent: #ffae85;
+  --accent-foreground: #2f3846;
+  --border: #55607a;
+  --input: #55607a;
+  --ring: #8fb0ff;
+  --ink: #55607a;
+  --ink-shadow: #05070c;
+  --on-pastel: #2f3846;
+  --powder: #223152;
+  --mint-soft: #1d3a33;
+  --peach-soft: #3d2a22;
+  --lilac: #8a73c9;
+  --lilac-soft: #2b2542;
+  --butter: #c9ac45;
+  --butter-soft: #3a3420;
+  --blush: #c97a9c;
+  --blush-soft: #3d2531;
+  --dot: rgba(232, 236, 245, 0.07);
 }
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-sm: calc(var(--radius) - 6px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ink: var(--ink);
+  --color-on-pastel: var(--on-pastel);
+  --color-powder: var(--powder);
+  --color-mint: var(--secondary);
+  --color-mint-soft: var(--mint-soft);
+  --color-peach: var(--accent);
+  --color-peach-soft: var(--peach-soft);
+  --color-lilac: var(--lilac);
+  --color-lilac-soft: var(--lilac-soft);
+  --color-butter: var(--butter);
+  --color-butter-soft: var(--butter-soft);
+  --color-blush: var(--blush);
+  --color-blush-soft: var(--blush-soft);
+
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-label: "Space Grotesk Variable", ui-monospace, sans-serif;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 2rem;
+
+  --shadow-cartoon: 0 4px 0 var(--ink-shadow);
+  --shadow-cartoon-lg: 0 6px 0 var(--ink-shadow);
+  --shadow-inset: inset 0 2px 0 rgba(47, 56, 70, 0.15);
 }
 
-* {
-  border-color: hsl(var(--border));
+@layer base {
+  * { border-color: var(--border); }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    background-color: var(--background);
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+    color: var(--foreground);
+  }
+  input, select, textarea {
+    border-width: 1.5px;
+    border-color: var(--ink);
+    border-radius: 0.75rem;
+    background-color: var(--card);
+    color: var(--foreground);
+  }
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  input[type="checkbox"], input[type="radio"] { accent-color: var(--secondary); width: 1.1rem; height: 1.1rem; }
+  input[type="range"] { accent-color: var(--primary); }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  min-height: 100vh;
-  margin: 0;
-  color: hsl(var(--foreground));
-  background:
-    radial-gradient(circle at 85% 0%, hsl(var(--accent) / 0.13), transparent 22rem),
-    hsl(var(--background));
-  font-family: var(--font-plus-jakarta), Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button,
-[role="button"] {
-  cursor: pointer;
-}
-
-button:disabled,
-[aria-disabled="true"] {
-  cursor: not-allowed;
-}
-
-::selection {
-  background: hsl(var(--accent) / 0.55);
-  color: hsl(var(--foreground));
-}
-
-:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 3px;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  border: 3px solid transparent;
-  border-radius: 999px;
-  background: hsl(var(--foreground) / 0.18);
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--foreground) / 0.28);
-  background-clip: padding-box;
+/* Cetak label termal: hanya elemen #thermal-label yang tampil */
+@media print {
+  body * { visibility: hidden !important; }
+  #thermal-label, #thermal-label * { visibility: visible !important; }
+  #thermal-label { position: fixed; inset: 0; margin: 0 auto; box-shadow: none !important; }
 }

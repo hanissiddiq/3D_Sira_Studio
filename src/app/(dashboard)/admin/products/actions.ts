@@ -19,10 +19,10 @@ function checkAssets(v: ProductFormValues): string | null {
 
 function toRow(v: ProductFormValues) {
   return {
-    slug: v.slug, category: v.category,
+    slug: v.slug, category: v.category, kind: v.kind,
     name_id: v.name_id, name_en: v.name_en,
     description_id: v.description_id || null, description_en: v.description_en || null,
-    base_price: v.base_price, text_fee: v.text_fee, logo_fee: v.logo_fee, weight_grams: v.weight_grams,
+    base_price: v.base_price, text_fee: v.text_fee, logo_fee: v.logo_fee, weight_grams: v.weight_grams, stock: v.kind === "ready" ? v.stock : null,
     is_active: v.is_active, model_url: v.model_url, images: v.images,
     customizer_config: v.customizer_config,
   };

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 interface Props {
-  folder: "models" | "images";
+  folder: "models" | "images" | "gallery";
   accept: string;
   maxBytes: number;
   label: string;
