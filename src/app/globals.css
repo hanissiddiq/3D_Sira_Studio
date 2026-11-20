@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+:root {
+  --background: 42 33% 98%;
+  --foreground: 225 30% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 225 30% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 225 30% 12%;
+  --primary: 222 47% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 37 36% 92%;
+  --secondary-foreground: 225 30% 18%;
+  --muted: 220 18% 96%;
+  --muted-foreground: 220 10% 44%;
+  --accent: 38 87% 67%;
+  --accent-foreground: 225 30% 12%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 16% 88%;
+  --input: 220 16% 88%;
+  --ring: 222 47% 32%;
+  --radius: 0.875rem;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 6px);
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: hsl(var(--foreground));
+  background:
+    radial-gradient(circle at 85% 0%, hsl(var(--accent) / 0.13), transparent 22rem),
+    hsl(var(--background));
+  font-family: var(--font-plus-jakarta), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.55);
+  color: hsl(var(--foreground));
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: hsl(var(--foreground) / 0.18);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground) / 0.28);
+  background-clip: padding-box;
+}
