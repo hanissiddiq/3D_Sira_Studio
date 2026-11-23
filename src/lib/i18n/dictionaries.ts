@@ -128,6 +128,10 @@ const id = {
     title: "Checkout", doneTitle: "Pesanan dibuat", yourCode: "Kode pesanan Anda:", payTotal: "Total pembayaran:",
     pendingNote: "Status saat ini: menunggu pembayaran. Simpan kode pesanan dan gunakan email yang Anda masukkan untuk melacaknya.",
     track: "Lacak pesanan", loading: "Memuat…",
+    redirecting: "Mengalihkan ke halaman pembayaran DOKU…", redirectManual: "Klik di sini jika tidak dialihkan otomatis",
+    payPopupHint: "Jendela pembayaran DOKU akan terbuka. Selesaikan pembayaran QRIS di sana, lalu kembali ke halaman ini.",
+    openPayment: "Buka jendela pembayaran", retryPayment: "Coba buka pembayaran lagi",
+    payLater: "Pesanan tersimpan, tetapi halaman pembayaran belum bisa dibuka. Buka Lacak Pesanan lalu tekan “Bayar sekarang”.",
     orderer: "Data pemesan", fullName: "Nama lengkap", phone: "No. HP / WhatsApp", email: "Email",
     addressTitle: "Alamat pengiriman", fullAddress: "Alamat lengkap", province: "Provinsi",
     chooseProvince: "Pilih provinsi", city: "Kota / Kabupaten", postal: "Kode pos",
@@ -139,6 +143,9 @@ const id = {
   orders: {
     title: "Lacak pesanan", code: "Kode pesanan", emailLabel: "Email saat memesan", search: "Cari pesanan",
     created: "Dibuat", total: "Total", tracking: "Nomor resi",
+    payNow: "Bayar sekarang", checkPayment: "Saya sudah bayar, cek status", payRedirecting: "Mengalihkan ke halaman pembayaran…",
+    payStillPending: "Pembayaran belum terdeteksi. Jika baru saja membayar, tunggu 1–2 menit lalu cek lagi.",
+    payConfirmed: "Pembayaran terkonfirmasi. Terima kasih!",
     statuses: {
       pending_payment: "Menunggu pembayaran", paid: "Dibayar, antre cetak", in_production: "Sedang dicetak",
       qc_finishing: "QC & finishing", packing: "Dikemas", shipped: "Dikirim", completed: "Selesai", cancelled: "Dibatalkan",
@@ -275,6 +282,10 @@ const en: Dict = {
     title: "Checkout", doneTitle: "Order placed", yourCode: "Your order code:", payTotal: "Amount due:",
     pendingNote: "Current status: awaiting payment. Keep your order code and use the email you entered to track it.",
     track: "Track order", loading: "Loading…",
+    redirecting: "Redirecting to the DOKU payment page…", redirectManual: "Click here if you are not redirected automatically",
+    payPopupHint: "The DOKU payment window will open. Complete the QRIS payment there, then return to this page.",
+    openPayment: "Open payment window", retryPayment: "Try opening payment again",
+    payLater: "Your order is saved, but the payment page could not be opened yet. Open Track Order and press “Pay now”.",
     orderer: "Your details", fullName: "Full name", phone: "Phone / WhatsApp", email: "Email",
     addressTitle: "Shipping address", fullAddress: "Full address", province: "Province",
     chooseProvince: "Select province", city: "City / Regency", postal: "Postal code",
@@ -286,6 +297,9 @@ const en: Dict = {
   orders: {
     title: "Track order", code: "Order code", emailLabel: "Email used to order", search: "Find order",
     created: "Placed", total: "Total", tracking: "Tracking number",
+    payNow: "Pay now", checkPayment: "I have paid, check status", payRedirecting: "Redirecting to the payment page…",
+    payStillPending: "Payment not detected yet. If you just paid, wait 1–2 minutes and check again.",
+    payConfirmed: "Payment confirmed. Thank you!",
     statuses: {
       pending_payment: "Awaiting payment", paid: "Paid, queued", in_production: "Printing",
       qc_finishing: "QC & finishing", packing: "Packing", shipped: "Shipped", completed: "Completed", cancelled: "Cancelled",

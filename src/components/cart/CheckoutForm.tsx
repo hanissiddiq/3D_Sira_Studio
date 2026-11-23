@@ -16,7 +16,9 @@ import { computeTotals, type Tier } from "@/lib/pricing";
 import { PROVINCES } from "@/lib/provinces";
 import { formatRupiah } from "@/lib/utils";
 import { checkoutFormSchema, type CheckoutFormValues, type CreateOrderInput } from "@/lib/validations/order";
-import { checkoutAction } from "@/app/(storefront)/checkout/actions";
+import { openDokuPayment } from "@/lib/doku/popup";
+import { checkoutAction, type PaymentInfo } from "@/app/(storefront)/checkout/actions";
+import { getPaymentLinkAction } from "@/app/(storefront)/orders/actions";
 import { BulkDiscountBanner } from "./BulkDiscountBanner";
 import { CartSummary } from "./CartSummary";
 
@@ -38,7 +40,8 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
   const [loadingRates, setLoadingRates] = useState(false);
   const [ratesError, setRatesError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ orderCode: string; total: number } | null>(null);
+  const [done, setDone] = useState<{ orderCode: string; total: number; email: string; payment: PaymentInfo | null; error?: string } | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } =
@@ -100,7 +103,11 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
     };
     startTransition(async () => {
       const res = await checkoutAction(input);
-      if (res.ok) { clear(); setDone({ orderCode: res.orderCode, total: res.total }); }
+      if (res.ok) {
+        clear();
+        setDone({ orderCode: res.orderCode, total: res.total, email: v.email, payment: res.payment, error: res.paymentError });
+        if (res.payment) void openDokuPayment(res.payment); // popup DOKU (atau redirect bila SDK tidak tersedia)
+      }
       else setFormError(res.error);
     });
   };
@@ -113,9 +120,25 @@ export function CheckoutForm({ tiers }: { tiers: Tier[] }) {
           <p>{t.yourCode}</p>
           <p className="rounded-md bg-muted p-3 text-center font-mono text-xl font-semibold">{done.orderCode}</p>
           <p>{t.payTotal} <span className="font-semibold">{formatRupiah(done.total)}</span></p>
-          <p className="text-muted-foreground">
-            {t.pendingNote}
-          </p>
+          {done.payment ? (
+            <>
+              <p className="text-muted-foreground">{done.payment.mode === "popup" ? t.payPopupHint : t.redirecting}</p>
+              <Button type="button" className="w-full" onClick={() => void openDokuPayment(done.payment!)}>{t.openPayment}</Button>
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground">{t.payLater}</p>
+              {done.error && <p role="alert" className="rounded-md bg-peach-soft p-2 text-xs text-on-pastel">{done.error}</p>}
+              <Button type="button" className="w-full" disabled={retrying}
+                onClick={async () => {
+                  setRetrying(true);
+                  const r = await getPaymentLinkAction({ orderCode: done.orderCode, email: done.email });
+                  setRetrying(false);
+                  if (r.ok) { setDone({ ...done, payment: r.payment, error: undefined }); void openDokuPayment(r.payment); }
+                  else setDone({ ...done, error: r.error });
+                }}>{t.retryPayment}</Button>
+            </>
+          )}
           <Button asChild className="w-full"><Link href="/orders">{t.track}</Link></Button>
         </CardContent>
       </Card>

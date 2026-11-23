@@ -10,9 +10,10 @@ import { useDict } from "@/components/layout/LanguageProvider";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { OrderTimeline } from "@/components/orders/OrderTimeline";
 import { ReviewModal } from "@/components/orders/ReviewModal";
+import { openDokuPayment } from "@/lib/doku/popup";
 import { formatDateTime } from "@/lib/order-status";
 import { formatRupiah } from "@/lib/utils";
-import { lookupOrderAction } from "@/app/(storefront)/orders/actions";
+import { getPaymentLinkAction, lookupOrderAction, syncPaymentStatusAction } from "@/app/(storefront)/orders/actions";
 
 type Found = Extract<Awaited<ReturnType<typeof lookupOrderAction>>, { ok: true }>["order"];
 interface Item { id: string; product_name: string; quantity: number; unit_price: number; reviews: unknown }
@@ -29,14 +30,41 @@ export function OrderLookup({ initialCode }: { initialCode?: string }) {
   const [order, setOrder] = useState<Found | null>(null);
   const [reviewing, setReviewing] = useState<Item | null>(null);
   const [reviewedIds, setReviewedIds] = useState<string[]>([]);
+  const [payMsg, setPayMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [payPending, startPay] = useTransition();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); setOrder(null); setReviewedIds([]);
+    setError(null); setOrder(null); setReviewedIds([]); setPayMsg(null);
     startTransition(async () => {
       const res = await lookupOrderAction({ orderCode: code, email });
       if (res.ok) { setOrder(res.order); setSearched({ code, email }); } else setError(res.error);
+    });
+  };
+
+  const payNow = () => {
+    if (!searched) return;
+    setPayMsg(null);
+    startPay(async () => {
+      const res = await getPaymentLinkAction({ orderCode: searched.code, email: searched.email });
+      if (!res.ok) return setPayMsg({ ok: false, text: res.error });
+      const how = await openDokuPayment(res.payment);
+      setPayMsg({ ok: true, text: how === "redirect" ? d.orders.payRedirecting : d.checkout.payPopupHint });
+    });
+  };
+
+  const checkPayment = () => {
+    if (!searched) return;
+    setPayMsg(null);
+    startPay(async () => {
+      const res = await syncPaymentStatusAction({ orderCode: searched.code, email: searched.email });
+      if (!res.ok) return setPayMsg({ ok: false, text: res.error });
+      if (res.paid) {
+        const fresh = await lookupOrderAction({ orderCode: searched.code, email: searched.email });
+        if (fresh.ok) setOrder(fresh.order);
+        setPayMsg({ ok: true, text: d.orders.payConfirmed });
+      } else setPayMsg({ ok: false, text: d.orders.payStillPending });
     });
   };
 
@@ -86,6 +114,15 @@ export function OrderLookup({ initialCode }: { initialCode?: string }) {
               })}
             </ul>
             <p className="flex justify-between border-t pt-2 font-semibold"><span>{t.total}</span><span>{formatRupiah(order.total)}</span></p>
+            {order.status === "pending_payment" && (
+              <div className="space-y-2 rounded-xl border-2 border-ink bg-butter-soft p-3 text-on-pastel">
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" size="sm" onClick={payNow} disabled={payPending}>{payPending && <Loader2 className="animate-spin" />}{t.payNow}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={checkPayment} disabled={payPending}>{t.checkPayment}</Button>
+                </div>
+                {payMsg && <p role="status" className={payMsg.ok ? "text-xs font-bold" : "text-xs font-bold text-red-700"}>{payMsg.text}</p>}
+              </div>
+            )}
             {order.tracking_number && <p>{t.tracking}: <span className="font-mono">{order.tracking_number}</span></p>}
             <OrderTimeline entries={order.order_status_history} labels={t.statuses} />
           </CardContent>

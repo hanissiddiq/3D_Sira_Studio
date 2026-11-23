@@ -130,6 +130,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <p className="pt-2">Kurir: {order.courier ?? "-"}</p>
               <p>Resi: {order.tracking_number ?? "-"}</p>
               <p>Pembayaran: {order.payment_status}{order.paid_at ? ` · ${formatDateTime(order.paid_at)}` : ""}</p>
+              {order.payment_provider && (
+                <p className="text-muted-foreground">
+                  {order.payment_provider.toUpperCase()} · percobaan {order.payment_attempts}
+                  {order.payment_expires_at ? ` · kedaluwarsa ${formatDateTime(order.payment_expires_at)}` : ""}
+                  {order.qris_reference ? ` · ref ${order.qris_reference}` : ""}
+                </p>
+              )}
             </CardContent>
           </Card>
 
